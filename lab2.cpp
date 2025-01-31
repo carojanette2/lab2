@@ -1,6 +1,6 @@
 //
-//modified by:
-//date:
+//modified by: Caroline Contreras
+//date:1/28/25
 //
 //original author: Gordon Griesel
 //date:            2025
@@ -9,6 +9,9 @@
 //This program needs some refactoring.
 //We will do this in class together.
 //
+//
+// to do list
+// 1/31/2025 add some text
 //
 #include <iostream>
 using namespace std;
@@ -22,6 +25,7 @@ using namespace std;
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
+#include "fonts.h"
 
 //some structures
 
@@ -33,6 +37,7 @@ public:
 	float dir;
 	float pos[2];
 	
+    int collcount;
     Global()
     {
         xres = 400;
@@ -41,7 +46,9 @@ public:
         dir = 30.0f;
         pos[0] = 0.0f+w;
         pos[1] = yres/2.0f;
+        collcount = 0;
     }
+
 } g;
 
 class X11_wrapper {
@@ -85,8 +92,10 @@ int main()
 		render();
 		x11.swapBuffers();
 		usleep(200);
-	}
-	return 0;
+    }
+
+    cleanup_fonts();
+    return 0;
 }
 
 
@@ -130,7 +139,7 @@ void X11_wrapper::set_title()
 {
 	//Set the window title bar.
 	XMapWindow(dpy, win);
-	XStoreName(dpy, win, "3350 Lab-1");
+	XStoreName(dpy, win, "3350 Lab-2:    Esc to exit");
 }
 
 bool X11_wrapper::getXPending()
@@ -246,6 +255,10 @@ void init_opengl(void)
 	glOrtho(0, g.xres, 0, g.yres, -1, 1);
 	//Set the screen background color
 	glClearColor(0.1, 0.1, 0.1, 1.0);
+
+    //Do this to allow fonts
+    //glEnable(GL_TEXTURE_2D);
+ initialize_fonts();
 }
 
 void physics()
@@ -254,6 +267,7 @@ void physics()
     g.pos[0] += g.dir;
     //collision detection
 	if (g.pos[0] >= (g.xres-g.w)) {
+
 		g.pos[0] = (g.xres-g.w);
 		g.dir = -g.dir;
 	}
@@ -272,9 +286,8 @@ void render()
 	//draw the box
 	glPushMatrix();
 
-
 	glColor3ub(250, 120, 220);
-	glTranslatef(g.pos[0], g.pos[1], 0.0f);
+    glTranslatef(g.pos[0], g.pos[1], 0.0f);
 	glBegin(GL_QUADS);
 		glVertex2f(-g.w, -g.w);
 		glVertex2f(-g.w,  g.w);
@@ -282,6 +295,18 @@ void render()
 		glVertex2f( g.w, -g.w);
 	glEnd();
 	glPopMatrix();
+
+
+    Rect r;
+    //glClear(GL_COLOR_BUFFER_BIT);
+     //
+    r.bot = g.yres - 20;
+    r.left = 10;
+    r.center = 0;
+    ggprint8b(&r, 16, 0x00ff0000, "3350 - Lab-2");
+    ggprint8b(&r, 16, 0x00ffff00, "Esc to exit");
+    ggprint8b(&r, 16, 0x00ffff00, "A    speed up");
+    ggprint8b(&r, 16, 0x00ffff00, "B    slow down");
 }
 
 
